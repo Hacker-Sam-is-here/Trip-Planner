@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PATHwise — Pollution-Aware Trip Helper</title>
+  </head>
+  <body class="bg-gray-100 text-gray-900 antialiased overflow-hidden">
+    <div id="root"></div>
+    <script>
+      window.addEventListener('error', function(event) {
+        console.error('Window error event:', event);
+        var existing = document.getElementById('runtime-error-banner');
+        if (!existing) {
+          existing = document.createElement('div');
+          existing.id = 'runtime-error-banner';
+          existing.style = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#ef4444;color:white;padding:16px;font-family:monospace;font-size:13px;white-space:pre-wrap;overflow:auto;max-height:50vh;box-shadow:0 4px 6px rgba(0,0,0,0.3);';
+          document.body.appendChild(existing);
+        }
+        existing.textContent = 'Runtime Error:\n' + (event.error ? (event.error.stack || event.error.message) : event.message);
+      });
+      window.addEventListener('unhandledrejection', function(event) {
+        console.error('Unhandled rejection:', event);
+        var existing = document.getElementById('runtime-error-banner');
+        if (!existing) {
+          existing = document.createElement('div');
+          existing.id = 'runtime-error-banner';
+          existing.style = 'position:fixed;top:0;left:0;right:0;z-index:999999;background:#ef4444;color:white;padding:16px;font-family:monospace;font-size:13px;white-space:pre-wrap;overflow:auto;max-height:50vh;box-shadow:0 4px 6px rgba(0,0,0,0.3);';
+          document.body.appendChild(existing);
+        }
+        var reason = event.reason;
+        existing.textContent = 'Unhandled Promise Rejection:\n' + (reason ? (reason.stack || reason.message || reason) : 'Unknown');
+      });
+    </script>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
