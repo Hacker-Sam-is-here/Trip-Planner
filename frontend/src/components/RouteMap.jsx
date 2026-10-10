@@ -6,8 +6,7 @@ import { getExposureColor } from "../utils/scoring.js";
 
 function getRouteGeometryHash(route) {
   const coords = route?.geometry?.coordinates || [];
-  const sample = coords.slice(0, 5).concat(coords.slice(-5));
-  return JSON.stringify(sample);
+  return JSON.stringify(coords);
 }
 
 export default function RouteMap({
@@ -62,7 +61,7 @@ export default function RouteMap({
 
     if (!routes || routes.length === 0) return;
 
-    // Deduplicate routes by geometry hash (C1)
+    // Deduplicate routes by full geometry hash (C1)
     const seenGeometries = new Set();
     const uniqueRoutes = routes.filter((route) => {
       const hash = getRouteGeometryHash(route);
@@ -94,7 +93,7 @@ export default function RouteMap({
         paint: {
           "line-color": getExposureColor(route.exposure_label),
           "line-width": isSelected ? 7 : 4,
-          "line-opacity": 0.9,
+          "line-opacity": isSelected ? 0.95 : 0.6,
         },
       });
 
@@ -118,6 +117,14 @@ export default function RouteMap({
       });
     });
 
+    // Bring selected route to top
+    if (selectedRoute) {
+      const selectedLayer = `layer-${selectedRoute}`;
+      if (map.getLayer(selectedLayer)) {
+        map.moveLayer(selectedLayer);
+      }
+    }
+
     // 3. Fit bounds
     const bounds = getBounds(routes);
     map.fitBounds(bounds, {
@@ -127,7 +134,7 @@ export default function RouteMap({
     });
   }, [routes, mapLoaded]);
 
-  // Update line width when selectedRoute changes without re-adding sources
+  // Update line width and opacity when selectedRoute changes without re-adding sources
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !mapLoaded) return;
@@ -136,6 +143,10 @@ export default function RouteMap({
       if (map.getLayer(layerId)) {
         const isSelected = routeId === selectedRoute;
         map.setPaintProperty(layerId, "line-width", isSelected ? 7 : 4);
+        map.setPaintProperty(layerId, "line-opacity", isSelected ? 0.95 : 0.6);
+        if (isSelected) {
+          map.moveLayer(layerId);
+        }
       }
     });
   }, [selectedRoute, mapLoaded]);
