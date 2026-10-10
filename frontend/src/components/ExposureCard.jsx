@@ -67,7 +67,7 @@ export default function ExposureCard({
         </div>
       </div>
 
-      {reduction && (
+      {reduction !== null && (
         <div className="mt-2.5 pt-2 border-t border-gray-100 text-xs text-emerald-700 font-medium flex items-center">
           <svg
             className="w-3.5 h-3.5 mr-1 text-emerald-600"

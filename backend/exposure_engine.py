@@ -22,10 +22,16 @@ def aqi_class_to_value(label: str) -> int:
     return AQI_CLASS_VALUES[normalized]
 
 
-def score_segment(segment: RouteSegment, hour_multiplier: float = 1.0) -> float:
-    """Calculate the time-weighted exposure score for a single segment."""
+def score_segment(
+    segment: RouteSegment,
+    hour_multiplier: float = 1.0,
+    congestion: float | None = None,
+) -> float:
+    """Calculate the time-weighted exposure score for a single segment with traffic weighting."""
     base_val = aqi_class_to_value(segment.aqi_class)
-    segment_score = base_val * segment.duration_min
+    c = segment.congestion if congestion is None else congestion
+    effective_value = base_val * (1.0 + 0.5 * c)
+    segment_score = effective_value * segment.duration_min
     return segment_score * hour_multiplier
 
 
@@ -59,7 +65,7 @@ def score_route(
     if total_travel_time <= 0:
         return 0.0
     total_segment_scores = sum(
-        score_segment(seg, multiplier) for seg in segments
+        score_segment(seg, multiplier, seg.congestion) for seg in segments
     )
     return total_segment_scores / total_travel_time
 
@@ -86,10 +92,10 @@ def _generate_reason(best: RouteResult, baseline: RouteResult) -> str:
             f"Route {best.route_id} has the lowest estimated exposure score of "
             f"{best.exposure_score} ({best.exposure_label})."
         )
-    diff_pct = round(
-        ((baseline.exposure_score - best.exposure_score) / baseline.exposure_score)
-        * 100
-    )
+    diff = baseline.exposure_score - best.exposure_score
+    if abs(diff) < 5:
+        return f"Route {best.route_id} is the slightly lower-exposure option."
+    diff_pct = round((diff / baseline.exposure_score) * 100)
     time_diff = round(best.duration_min - baseline.duration_min)
     if time_diff > 0:
         return (

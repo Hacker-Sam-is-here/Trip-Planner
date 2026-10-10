@@ -44,6 +44,7 @@ export function formatDistance(km) {
 
 /**
  * Calculates exposure reduction percentage rounded to nearest 5%.
+ * Returns null if absolute score difference is less than 5.
  * @param {number} scoreA
  * @param {number} scoreB
  * @returns {string | null}
@@ -52,10 +53,18 @@ export function getReductionPercent(scoreA, scoreB) {
   if (typeof scoreA !== "number" || typeof scoreB !== "number") {
     return null;
   }
-  const diff = scoreA - scoreB;
-  if (scoreB >= scoreA || diff < 5 || scoreA <= 0) {
+  const diff = Math.abs(scoreA - scoreB);
+  if (diff < 5) {
     return null;
   }
-  const pct = Math.round(((diff / scoreA) * 100) / 5) * 5;
+  const higher = Math.max(scoreA, scoreB);
+  const lower = Math.min(scoreA, scoreB);
+  if (higher <= 0) {
+    return null;
+  }
+  const pct = Math.round((((higher - lower) / higher) * 100) / 5) * 5;
+  if (pct <= 0) {
+    return null;
+  }
   return `~${pct}% lower`;
 }

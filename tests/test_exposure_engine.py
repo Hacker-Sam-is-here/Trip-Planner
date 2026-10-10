@@ -92,10 +92,41 @@ def test_hour_profile_with_multiplier() -> None:
 
 
 def test_score_segment_calculation() -> None:
-    """Test score_segment with explicit hour multiplier."""
+    """Test score_segment with explicit hour multiplier and congestion=0.0."""
     seg = RouteSegment(lat=28.61, lon=77.20, aqi_class="Poor", pm25=60.0, duration_min=12.0)
-    score = score_segment(seg, hour_multiplier=1.2)
+    score = score_segment(seg, hour_multiplier=1.2, congestion=0.0)
     assert score == pytest.approx(75 * 12.0 * 1.2)
+
+
+def test_score_segment_high_congestion() -> None:
+    """Same AQ class, congestion=1.0 should produce 1.5x the score of congestion=0.0."""
+    seg = RouteSegment(lat=28.61, lon=77.20, aqi_class="Poor", pm25=60.0, duration_min=12.0)
+    score_zero = score_segment(seg, hour_multiplier=1.2, congestion=0.0)
+    score_high = score_segment(seg, hour_multiplier=1.2, congestion=1.0)
+    assert score_high == pytest.approx(score_zero * 1.5)
+
+
+def test_compare_routes_diff_less_than_five() -> None:
+    """Difference < 5 points outputs slightly lower-exposure option without percentage."""
+    route_a = RouteResult(
+        route_id="A",
+        distance_km=8.2,
+        duration_min=27.0,
+        exposure_score=72,
+        exposure_label="High",
+        geometry={"type": "LineString", "coordinates": []},
+    )
+    route_b = RouteResult(
+        route_id="B",
+        distance_km=8.5,
+        duration_min=28.0,
+        exposure_score=70,
+        exposure_label="High",
+        geometry={"type": "LineString", "coordinates": []},
+    )
+    rec = compare_routes([route_a, route_b])
+    assert rec["recommended_route"] == "B"
+    assert rec["reason"] == "Route B is the slightly lower-exposure option."
 
 
 def test_normalize_score_boundaries() -> None:

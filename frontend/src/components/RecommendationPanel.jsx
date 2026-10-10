@@ -51,7 +51,7 @@ export default function RecommendationPanel({ recommendation, routes }) {
       <p className="mt-2 text-sm text-green-800 leading-relaxed">
         {reasonText}
       </p>
-      {!isSingleRoute && reductionText && (
+      {!isSingleRoute && reductionText !== null && (
         <div className="mt-2.5 inline-block bg-white text-green-700 text-xs px-2.5 py-1 rounded-md font-semibold border border-green-200">
           Estimated {reductionText} exposure
         </div>
