@@ -2,9 +2,13 @@
 .env
 .env.local
 *.env
+frontend/.env
+frontend/.env.local
+infra/demo_routes_raw.json
 
 # Python
 __pycache__/
+*.pyc
 *.py[cod]
 *$py.class
 *.so

@@ -1,5 +1,4 @@
-"""Unit tests for PATHwise data fetchers and segment scoring."""
-
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 import pytest
 import requests
@@ -14,6 +13,8 @@ from backend.route_fetcher import get_routes
 from backend.segment_scorer import score_route_segments
 from backend.time_profile import DELHI_FALLBACK_PROFILE, build_hourly_profile
 from backend.weather_fetcher import get_weather
+
+MODEL_PATH = Path(__file__).resolve().parent.parent / "ml" / "air_quality_model.pkl"
 
 
 def test_get_weather_fallback_on_exception(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -262,7 +263,7 @@ def test_build_hourly_profile_groups_readings_by_hour(
 
 def test_score_route_segments_produces_one_per_segment() -> None:
     """score_route_segments produces one RouteSegment per segment in route."""
-    model = load_model("ml/air_quality_model.pkl")
+    model = load_model(str(MODEL_PATH))
     mock_route = {
         "route_id": "A",
         "distance_km": 5.0,
