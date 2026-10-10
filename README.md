@@ -91,11 +91,11 @@ on published CPCB Delhi seasonal averages is used.
 
 ## Results
 
-For the Delhi demo scenario (Connaught Place → Nehru Place, driving, 8am):
-- Route A: 13.44 km, 40.2 min — exposure score 68 (High)
-- Route B: 13.95 km, 41.5 min — exposure score 51 (Moderate)
+For the Delhi demo scenario (Karol Bagh → Lajpat Nagar, driving, 8am):
+- Route A: 13.43 km, 37.1 min — exposure score 68 (High)
+- Route B: 14.13 km, 39.8 min — exposure score 51 (Moderate)
 - Route B provides approximately 25% lower estimated exposure
-  despite taking ~1.3 minutes longer
+  by avoiding the high-traffic Ring Road corridor despite taking ~2.7 minutes longer
 
 All scores are model-based relative estimates.
 
