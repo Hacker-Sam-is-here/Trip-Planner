@@ -18,11 +18,14 @@ export default function App() {
         return DEMO_INPUT;
       }
     }
+    const now = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const defaultTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(now.getHours())}:00:00+05:30`;
     return {
       origin: "",
       destination: "",
       mode: "driving",
-      departure_time: "",
+      departure_time: defaultTime,
     };
   });
 
@@ -114,6 +117,16 @@ export default function App() {
   const handleDemoClick = () => {
     setInput(DEMO_INPUT);
     executeAnalysis(DEMO_INPUT);
+  };
+
+  const handleHourSelect = (hour) => {
+    const dateStr = input.departure_time
+      ? input.departure_time.slice(0, 10)
+      : new Date().toISOString().slice(0, 10);
+    const newDepartureTime = `${dateStr}T${String(hour).padStart(2, "0")}:00:00+05:30`;
+    const updatedInput = { ...input, departure_time: newDepartureTime };
+    setInput(updatedInput);
+    executeAnalysis(updatedInput);
   };
 
   // If VITE_API_URL is missing, show only ErrorBanner
@@ -235,7 +248,10 @@ export default function App() {
               factors={result.recommendation?.contributing_factors}
             />
 
-            <TimeChart time_profile={result.time_profile} />
+            <TimeChart
+              time_profile={result.time_profile}
+              onSelectHour={handleHourSelect}
+            />
           </div>
         )}
       </div>

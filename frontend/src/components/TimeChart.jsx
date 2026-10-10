@@ -8,7 +8,7 @@ function getAqiLabel(score) {
   return "Very High";
 }
 
-export default function TimeChart({ time_profile }) {
+export default function TimeChart({ time_profile, onSelectHour }) {
   const [hovered, setHovered] = useState(null);
   const touchTimerRef = useRef(null);
 
@@ -33,6 +33,11 @@ export default function TimeChart({ time_profile }) {
   // Determine scale max (handle scores clamped or unclamped)
   const maxScore = Math.max(100, ...scores);
 
+  // Find cleanest hour
+  const minScore = Math.min(...scores);
+  const bestIdx = scores.indexOf(minScore);
+  const bestHour = hours[bestIdx];
+
   // Adaptive label step to prevent crowding (C3)
   const step = count > 14 ? 3 : count > 7 ? 2 : 1;
 
@@ -43,24 +48,55 @@ export default function TimeChart({ time_profile }) {
     }
     touchTimerRef.current = setTimeout(() => {
       setHovered(null);
-    }, 2000);
+    }, 3000);
+  };
+
+  const handleBarClick = (data) => {
+    if (onSelectHour) {
+      onSelectHour(data.hour);
+    }
   };
 
   return (
     <div className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-      <div className="flex items-center justify-between mb-1">
+      <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-bold text-gray-800">
           Best time to travel — Route {route}
         </h4>
-        {hovered !== null ? (
-          <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded">
-            {hovered.hour}:00 — {hovered.label} ({hovered.score})
-          </span>
-        ) : (
-          <span className="text-xs text-gray-400">Hover or tap for details</span>
+        {onSelectHour && (
+          <button
+            type="button"
+            onClick={() => onSelectHour(bestHour)}
+            className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-md transition-colors flex items-center space-x-1"
+            title={`Click to shift departure to ${bestHour}:00 for lowest exposure`}
+          >
+            <span>✨ Best at {bestHour}:00</span>
+            <span className="text-[9px] bg-emerald-600 text-white px-1 py-0.2 rounded font-bold">Shift</span>
+          </button>
         )}
       </div>
-      <p className="text-xs text-gray-400 mb-2">Lower is better</p>
+
+      <div className="flex items-center justify-between mb-2">
+        {hovered !== null ? (
+          <div className="flex items-center space-x-2">
+            <span className="text-xs font-semibold text-gray-700 bg-gray-100 px-2 py-0.5 rounded">
+              {hovered.hour}:00 — {hovered.label} ({hovered.score}/100)
+            </span>
+            {onSelectHour && (
+              <button
+                type="button"
+                onClick={() => onSelectHour(hovered.hour)}
+                className="text-[11px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-2 py-0.5 rounded transition-all shadow-xs"
+              >
+                Depart at {hovered.hour}:00 →
+              </button>
+            )}
+          </div>
+        ) : (
+          <span className="text-xs text-gray-400">Click any hour to test departure</span>
+        )}
+        <span className="text-[11px] text-gray-400">Lower is better</span>
+      </div>
 
       <div className="w-full">
         <svg
@@ -89,6 +125,7 @@ export default function TimeChart({ time_profile }) {
             const y = chartHeight + 8 - barH;
 
             const isHovered = hovered && hovered.index === idx;
+            const isBest = hour === bestHour;
 
             const data = { index: idx, hour, score, label };
 
@@ -98,7 +135,7 @@ export default function TimeChart({ time_profile }) {
                 onMouseEnter={() => setHovered(data)}
                 onMouseLeave={() => setHovered(null)}
                 onTouchStart={() => handleTouch(data)}
-                onClick={() => handleTouch(data)}
+                onClick={() => handleBarClick(data)}
                 className="cursor-pointer"
               >
                 <rect
@@ -108,8 +145,10 @@ export default function TimeChart({ time_profile }) {
                   height={barH}
                   rx="3"
                   fill={color}
+                  stroke={isBest ? "#059669" : "none"}
+                  strokeWidth={isBest ? 1.5 : 0}
                   opacity={isHovered ? 1 : 0.85}
-                  className="transition-all duration-150"
+                  className="transition-all duration-150 hover:brightness-110"
                 />
 
                 {/* Show spaced hour labels */}
@@ -118,7 +157,9 @@ export default function TimeChart({ time_profile }) {
                     x={x + barWidth / 2}
                     y={chartHeight + 22}
                     textAnchor="middle"
-                    className="text-[10px] fill-gray-400 select-none font-mono"
+                    className={`text-[10px] select-none font-mono ${
+                      isBest ? "fill-emerald-600 font-bold" : "fill-gray-400"
+                    }`}
                   >
                     {hour}h
                   </text>

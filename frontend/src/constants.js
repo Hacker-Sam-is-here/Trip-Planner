@@ -14,6 +14,42 @@ export const EXPOSURE_BG = {
 
 export const MODES = ["walking", "cycling", "driving"];
 
+export const PRESET_SCENARIOS = [
+  {
+    id: "commute",
+    name: "Commute",
+    icon: "🚗",
+    origin: "Karol Bagh, Delhi",
+    originCoord: "28.6514,77.1907",
+    destination: "Lajpat Nagar, Delhi",
+    destCoord: "28.5700,77.2373",
+    mode: "driving",
+    departure_time: "2026-10-10T08:00:00+05:30",
+  },
+  {
+    id: "cycling",
+    name: "Cycling",
+    icon: "🚴",
+    origin: "Connaught Place, Delhi",
+    originCoord: "28.6315,77.2167",
+    destination: "Lodhi Garden, Delhi",
+    destCoord: "28.5931,77.2197",
+    mode: "cycling",
+    departure_time: "2026-10-10T07:00:00+05:30",
+  },
+  {
+    id: "walking",
+    name: "Walking",
+    icon: "🚶",
+    origin: "Rohini Sector 23, Delhi",
+    originCoord: "28.7093,77.1060",
+    destination: "Pitampura, Delhi",
+    destCoord: "28.6990,77.1384",
+    mode: "walking",
+    departure_time: "2026-10-10T09:00:00+05:30",
+  },
+];
+
 export const DEMO_INPUT = {
   origin: "28.6315,77.2167",
   destination: "28.5491,77.2520",

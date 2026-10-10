@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MODES } from "../constants.js";
+import { MODES, PRESET_SCENARIOS } from "../constants.js";
 import { geocodePlace, isLatLon } from "../utils/geo.js";
 
 export default function TripForm({ input, onChange, onSubmit, onDemoClick, loading }) {
@@ -37,6 +37,25 @@ export default function TripForm({ input, onChange, onSubmit, onDemoClick, loadi
       setDestError(null);
     }
   }, [input.destination]);
+
+  const handleSelectPreset = (preset) => {
+    setOriginDisplay(preset.origin);
+    setOriginCoord(preset.originCoord);
+    setOriginLabel(preset.origin);
+    setOriginError(null);
+    setOriginGeocoding(false);
+
+    setDestDisplay(preset.destination);
+    setDestCoord(preset.destCoord);
+    setDestLabel(preset.destination);
+    setDestError(null);
+    setDestGeocoding(false);
+
+    onChange("origin", preset.originCoord);
+    onChange("destination", preset.destCoord);
+    onChange("mode", preset.mode);
+    onChange("departure_time", preset.departure_time);
+  };
 
   // Origin field handlers
   const handleOriginChange = (e) => {
@@ -159,7 +178,7 @@ export default function TripForm({ input, onChange, onSubmit, onDemoClick, loadi
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-bold text-gray-800 tracking-tight">Plan Cleanest Route</h2>
         <button
           type="button"
@@ -169,6 +188,34 @@ export default function TripForm({ input, onChange, onSubmit, onDemoClick, loadi
         >
           Load Demo
         </button>
+      </div>
+
+      {/* 1-Click Curated Scenario Presets */}
+      <div className="mb-4 pb-3 border-b border-gray-100">
+        <div className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mb-1.5 flex items-center justify-between">
+          <span>Quick Scenarios</span>
+          <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">1-click test</span>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {PRESET_SCENARIOS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => handleSelectPreset(preset)}
+              className="px-2 py-1.5 bg-gray-50 hover:bg-emerald-50 hover:border-emerald-300 border border-gray-200 rounded-lg text-left transition-all group cursor-pointer"
+            >
+              <div className="flex items-center space-x-1">
+                <span className="text-xs">{preset.icon}</span>
+                <span className="text-xs font-bold text-gray-800 group-hover:text-emerald-800 truncate">
+                  {preset.name}
+                </span>
+              </div>
+              <div className="text-[10px] text-gray-500 truncate mt-0.5">
+                {preset.origin.split(",")[0]}
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-3.5">
@@ -254,22 +301,37 @@ export default function TripForm({ input, onChange, onSubmit, onDemoClick, loadi
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">
-              Mode
+              Travel Mode
             </label>
-            <select
-              value={input.mode}
-              onChange={(e) => onChange("mode", e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none capitalize bg-white"
-            >
-              {MODES.map((mode) => (
-                <option key={mode} value={mode}>
-                  {mode}
-                </option>
-              ))}
-            </select>
+            <div className="grid grid-cols-3 gap-1 p-1 bg-gray-100 rounded-lg border border-gray-200">
+              {MODES.map((m) => {
+                const isSelected = input.mode === m;
+                const modeDetails = {
+                  walking: { label: "Walk", icon: "🚶" },
+                  cycling: { label: "Cycle", icon: "🚴" },
+                  driving: { label: "Drive", icon: "🚗" },
+                };
+                const { label, icon } = modeDetails[m] || { label: m, icon: "" };
+                return (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => onChange("mode", m)}
+                    className={`py-1.5 px-1 rounded-md text-xs font-semibold transition-all flex items-center justify-center space-x-1 ${
+                      isSelected
+                        ? "bg-white text-emerald-700 shadow-xs border border-gray-200/80 font-bold"
+                        : "text-gray-600 hover:text-gray-900"
+                    }`}
+                  >
+                    <span>{icon}</span>
+                    <span>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div>
@@ -281,7 +343,7 @@ export default function TripForm({ input, onChange, onSubmit, onDemoClick, loadi
               value={input.departure_time ? input.departure_time.slice(0, 16) : ""}
               onChange={(e) => onChange("departure_time", e.target.value ? `${e.target.value}:00+05:30` : "")}
               required
-              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
+              className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none bg-white font-mono"
             />
           </div>
         </div>
